@@ -66,7 +66,9 @@ class PostController extends BaseController
                 return;
             }
 
-            $this->post->store($this->validator->getRequests());
+            $request = $this->validator->getRequests();
+
+            $this->post->store($request);
 
             return $this->redirect('/');
         }

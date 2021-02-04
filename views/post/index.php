@@ -14,7 +14,7 @@
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
                         <input type="text" class="form-control<?php echo $validator->has('title') ? ' is-invalid' : '' ?>" id="title" name="title" placeholder="Input title" value="<?php echo $validator->old('title') ?>">
-                        <?php if($validator->has('title')) : ?>
+                        <?php if ($validator->has('title')) : ?>
                             <div class="invalid-feedback">
                                 <?php echo $validator->get('title') ?>
                             </div>

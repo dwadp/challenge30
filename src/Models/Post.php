@@ -31,8 +31,7 @@ class Post extends Model
      */
     public function store($data)
     {
-        $now                = date('Y-m-d H:i:s');
-        $data['created_at'] = $now;
+        $data['created_at'] = date('Y-m-d H:i:s');
 
         $this->insert($data);
     }

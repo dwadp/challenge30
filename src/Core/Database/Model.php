@@ -119,11 +119,11 @@ class Model
 
         if (($columnsLength === 1) &&
             (is_array($columns[0]))) {
-            $query .= implode(', ', $columns[0]);
+            $query  .= implode(', ', $columns[0]);
         } elseif ($columnsLength > 1) {
-            $query .= implode(', ', $columns);
+            $query  .= implode(', ', $columns);
         } else {
-            $query .= '*';
+            $query  .= '*';
         }
 
         $query .= " FROM {$this->table}";
@@ -326,7 +326,7 @@ class Model
      */
     private function castMultipleResult($result)
     {
-        foreach($result as $key => $model) {
+        foreach ($result as $key => $model) {
             foreach ($model->casts as $key => $cast) {
                 $model->{$key} = $this->castColumn($cast, $model->{$key});
             }

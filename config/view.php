@@ -1,7 +1,5 @@
 <?php
 
-$value = [
+return [
     'path' => __DIR__ . '/../views'
 ];
-
-$config->add('view', $value);

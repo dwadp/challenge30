@@ -17,7 +17,7 @@ class Config
      * @var array
      */
     private static $options = [
-        'path' => 'config',
+        'path'  => __DIR__ . '/config',
         'files' => []
     ];
 
@@ -37,13 +37,15 @@ class Config
      */
     private function loadConfigurationFiles()
     {
-        $config = $this;
-        $options = self::$options;
+        $config     = $this;
+        $options    = self::$options;
 
         foreach ($options['files'] as $name) {
-            $path = $options['path'] . '/' . $name . '.php';
+            $path   = $options['path'] . '/' . $name . '.php';
 
-            require_once $path;
+            $value  = include_once $path;
+
+            $this->add($name, $value);
         }
     }
 
@@ -148,8 +150,8 @@ class Config
                 continue;
             }
 
-            $config = $configs[$value];
-            $remainingKeys = $this->getRemainingKeys($parentKey, $keys);
+            $config         = $configs[$value];
+            $remainingKeys  = $this->getRemainingKeys($parentKey, $keys);
 
             // If only one key left, just return the current config value
             if (count($remainingKeys) < 2) {
