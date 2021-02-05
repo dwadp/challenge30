@@ -10,7 +10,7 @@ $connection = Connection::make(
     $config->get('database.host'),
     $config->get('database.name'),
     $config->get('database.username'),
-    $config->get('database.password'),
+    $config->get('database.password')
 );
 
 Registry::register('connection', $connection);
