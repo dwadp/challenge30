@@ -2,9 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Core\Config;
 use App\Core\Registry;
-use App\Core\Validator;
+use App\Core\Url;
 
 class BaseController
 {
@@ -23,45 +22,64 @@ class BaseController
     protected $validator;
 
     /**
-     * Views path
+     * The request instance
      *
-     * @var string
+     * @var App\Core\Request
      */
-    protected $viewsPath;
+    protected $request;
+
+    /**
+     * The url instance
+     *
+     * @var App\Core\Url
+     */
+    protected $url;
+
+    /**
+     * The view instance
+     *
+     * @var App\Core\View
+     */
+    protected $view;
 
     public function __construct()
     {
         $this->config       = Registry::get('config');
         $this->validator    = Registry::get('validator');
-        $this->viewsPath    = $this->config->get('view.path');
+        $this->request      = Registry::get('request');
+        $this->url          = Registry::get('url');
+        $this->view         = Registry::get('view');
+
+        $this->initializeController();
     }
 
     /**
-     * Get all dependencies
+     * Initialize the base controller
      *
      * @return void
+     */
+    private function initializeController()
+    {
+        // Capture all incoming request
+        $this->request->capture();
+
+        // Set dependencies so the view can use it
+        $this->view->setDependencies($this->getDependencies());
+    }
+
+    /**
+     * Define all dependencies
+     * This dependencies will be provided to all views
+     *
+     * @return array
      */
     private function getDependencies()
     {
         return [
-            'config'    => $this->config,
-            'validator' => $this->validator
+            'validator' => $this->validator,
+            'request'   => $this->request,
+            'url'       => $this->url
         ];
-    }
-
-    /**
-     * Load a view and pass some data to it
-     *
-     * @param string $path
-     * @param array $data
-     * @return void
-     */
-    protected function view($path, $data = [])
-    {
-        extract($this->getDependencies());
-        extract($data);
-
-        require_once $this->viewsPath . '/' . $path;
     }
 
     /**
@@ -72,12 +90,7 @@ class BaseController
      */
     protected function redirect($location)
     {
-        $intended   = $location === "/" || $location === "" ? false : true;
-        $url        = $this->config->get('app.baseUrl');
-
-        if ($intended) {
-            $url .= "/{$location}";
-        }
+        $url = $this->url->make($location);
 
         header("Location: {$url}");
     }

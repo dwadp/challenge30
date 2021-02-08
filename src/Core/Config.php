@@ -82,10 +82,10 @@ class Config
      * @param string $key
      * @return mixed
      */
-    public function get($key)
+    public function get($key, $default = '')
     {
         if ($this->isNestedKey($key)) {
-            return $this->getNested($key);
+            return $this->getNested($key, '', [], $default);
         }
 
         if (!$this->has($key)) {
@@ -94,7 +94,24 @@ class Config
 
         $config = self::$configs[$key];
 
+        if ($this->shouldUseDefault($config, $default)) {
+            return $default;
+        }
+
         return $config;
+    }
+
+    private function shouldUseDefault($value, $default)
+    {
+        if ((is_bool($value)) && $value === null && $default) {
+            return true;
+        }
+
+        if (is_string($value) && $value === '' && $default !== '') {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -123,7 +140,7 @@ class Config
      * @param array $configs
      * @return mixed
      */
-    private function getNested($key, $parentKey = '', $configs = [])
+    private function getNested($key, $parentKey = '', $configs = [], $default = '')
     {
         $keys = explode('.', $key);
 
@@ -155,13 +172,21 @@ class Config
 
             // If only one key left, just return the current config value
             if (count($remainingKeys) < 2) {
+                if ($this->shouldUseDefault($config, $default)) {
+                    return $default;
+                }
+
                 return $config;
             }
 
             if (is_array($config)) {
                 $nestedKey = $this->getNestedKey($parentKey, $keys);
 
-                return $this->getNested($nestedKey, $value, $config);
+                return $this->getNested($nestedKey, $value, $config, $default);
+            }
+
+            if ($this->shouldUseDefault($config, $default)) {
+                return $default;
             }
 
             return $config;

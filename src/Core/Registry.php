@@ -27,7 +27,7 @@ class Registry
      * Get registered dependency
      *
      * @param string $name
-     * @return null | object
+     * @return null|object
      */
     public static function get($name)
     {

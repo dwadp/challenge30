@@ -51,7 +51,7 @@ class Model
      * Get a value with a specific column
      *
      * @param string $key
-     * @return null | mixed
+     * @return null|mixed
      */
     public function __get($key)
     {
@@ -107,9 +107,9 @@ class Model
     /**
      * Construct SQL `SELECT` query
      *
-     * @param string $table
-     * @param array $columns
-     * @param string $additional
+     * @param string    $table
+     * @param array     $columns
+     * @param string    $additional
      * @return string
      */
     private function buildSelectQuery($columns = [])
@@ -152,8 +152,8 @@ class Model
     /**
      * Store the data to the given table
      *
-     * @param string $table
-     * @param array $data
+     * @param string    $table
+     * @param array     $data
      * @return void
      */
     public function insert($data)
@@ -168,9 +168,9 @@ class Model
     /**
      * Get all data from the given table
      *
-     * @param string $table
-     * @param array $columns
-     * @param string $additional
+     * @param string    $table
+     * @param array     $columns
+     * @param string    $additional
      * @return array
      */
     public function select(...$columns)
@@ -225,7 +225,7 @@ class Model
     /**
      * Order query 'ORDER BY'
      *
-     * @param string | array ...$options
+     * @param string|array ...$options
      * @return QueryBuilder
      */
     public function order(...$options)
@@ -287,7 +287,7 @@ class Model
     /**
      * Cast the result if there are casts assigned
      *
-     * @param array | object $result
+     * @param array|object $result
      * @return array
      */
     private function castResult($result)
@@ -338,8 +338,8 @@ class Model
     /**
      * Determine which cast should be applied to specific column
      *
-     * @param string $cast
-     * @param mixed $value
+     * @param string    $cast
+     * @param mixed     $value
      * @return mixed
      */
     private function castColumn($cast, $value)

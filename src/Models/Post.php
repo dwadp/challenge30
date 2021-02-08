@@ -15,7 +15,7 @@ class Post extends Model
     protected $table = 'posts';
 
     /**
-     * Define columns cast
+     * Define columns casts
      *
      * @var array
      */

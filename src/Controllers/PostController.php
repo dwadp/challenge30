@@ -17,72 +17,67 @@ class PostController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        
+
         $this->post = new Post;
     }
 
     /**
-     * Handle index page
+     * Index page
      *
      * @return void
      */
-    public function handleIndex()
+    public function index()
     {
-        $this->handlePostForm();
-        $this->showPosts();
+        $posts = $this->post->all();
+        
+        $this->store();
+        
+        $this->view->render('post/index.php', ['posts' => $posts]);
+
     }
 
     /**
-     * Handle post form submission and save all data to the database
+     * Validate data based on the given rules
+     *
+     * @param array $data
+     * @return boolean
+     */
+    private function validate($data)
+    {
+        $rules = [
+            'title' => [
+                'required'  => true,
+                'lengths'   => [10, 32]
+            ],
+            'body'  => [
+                'required'  => true,
+                'lengths'   => [10, 200]
+            ]
+        ];
+
+        $this->validator->validate($rules, $data);
+
+        return $this->validator->error->empty();
+    }
+
+    /**
+     * Store the requested data to database
      *
      * @return void
      */
-    public function handlePostForm()
+    public function store()
     {
-        $submitted = isset($_POST['submit']) ? true : false;
+        if ($this->request->has('submit')) {
+            $request        = $this->request->only(['title', 'body']);
+            $validationPass = $this->validate($request);
 
-        if ($submitted) {
-            $rules = [
-                'title' => [
-                    'required'      => true,
-                    'rangechars'    => [
-                        'from'  => 10,
-                        'to'    => 32
-                    ]
-                ],
-                'body'  => [
-                    'required'      => true,
-                    'rangechars'    => [
-                        'from'  => 10,
-                        'to'    => 200
-                    ]
-                ]
-            ];
-
-            $this->validator->validate($rules, $_POST);
-
-            if (!$this->validator->errorsEmpty()) {
-                $this->validator->old('title');
+            if (!$validationPass) {
                 return;
             }
-
-            $request = $this->validator->getRequests();
 
             $this->post->store($request);
 
             return $this->redirect('/');
         }
-    }
-
-    /**
-     * Get all data from posts table in the database
-     *
-     * @return array
-     */
-    public function showPosts()
-    {
-        $posts = $this->post->all();
-        
-        $this->view('post/index.php', ['posts' => $posts]);
     }
 }

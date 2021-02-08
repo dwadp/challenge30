@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Core;
+namespace App\Core\Validator;
+
+use App\Core\Validator\ValidationError;
 
 class Validator
 {
     /**
-     * All errors recorded during validation
+     * The validation error instance
      *
-     * @var array
+     * @var App\Core\Validator\ValidationError
      */
-    private $errors = [];
+    public $error;
 
-    /**
-     * All input request recorded during validation
-     *
-     * @var array
-     */
-    private $requests = [];
+    public function __construct()
+    {
+        $this->error = new ValidationError;
+    }
 
     /**
      * Validate with the given rules and data
@@ -40,9 +40,9 @@ class Validator
     /**
      * Validate individual field with the given rules and value
      *
-     * @param array $rules
-     * @param string $key
-     * @param mixed $value
+     * @param array     $rules
+     * @param string    $key
+     * @param mixed     $value
      * @return void
      */
     private function validateIndividual($rules, $key, $value)
@@ -56,10 +56,10 @@ class Validator
      * Determine how the input will be validated with the given rule 
      * and set the error based on the rule
      *
-     * @param string $ruleKey
-     * @param mixed $ruleValue
-     * @param string $inputKey
-     * @param mixed $inputValue
+     * @param string    $ruleKey
+     * @param mixed     $ruleValue
+     * @param string    $inputKey
+     * @param mixed     $inputValue
      * @return void
      */
     private function validateRule($ruleKey, $ruleValue, $inputKey, $inputValue)
@@ -69,12 +69,12 @@ class Validator
         switch ($ruleKey) {
             case 'required':
                 if (!$this->validateRequired($inputValue)) {
-                    $this->setError($inputKey, "{$label} is required");
+                    $this->error->set($inputKey, "{$label} is required");
                 }
                 break;
             case 'minlength':
                 if (!$this->validateMinLength($ruleValue, $inputValue)) {
-                    $this->setError(
+                    $this->error->set(
                         $inputKey,
                         "{$label} must be at least {$ruleValue} characters long"
                     );
@@ -82,130 +82,24 @@ class Validator
                 break;
             case 'maxlength':
                 if (!$this->validateMaxLength($ruleValue, $inputValue)) {
-                    $this->setError(
+                    $this->error->set(
                         $inputKey,
                         "{$label} must be set at maximum of {$ruleValue} characters long"
                     );
                 }
                 break;
-            case 'rangechars':
-                if (!$this->validateRangeChars($ruleValue, $inputValue)) {
-                    $from = $ruleValue['from'];
-                    $to = $ruleValue['to'];
+            case 'lengths':
+                if (!$this->validateLengths($ruleValue, $inputValue)) {
+                    $from   = $ruleValue[0];
+                    $to     = $ruleValue[1];
 
-                    $this->setError(
+                    $this->error->set(
                         $inputKey,
                         "{$label} must be {$from} to {$to} characters long"
                     );
                 }
+                break;
         }
-    }
-
-    /**
-     * Set error message
-     *
-     * @param string $key
-     * @param string $value
-     * @return void
-     */
-    public function setError($key, $value)
-    {
-        $this->errors[$key][] = $value;
-    }
-
-    /**
-     * Check if there's no error recorded
-     *
-     * @return boolean
-     */
-    public function errorsEmpty()
-    {
-        if (count($this->errors) === 0) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if error exists by specific field/key
-     *
-     * @param string $key
-     * @return boolean
-     */
-    public function has($key)
-    {
-        if (!isset($this->errors[$key])) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Get the first error message captured by a specific field/key
-     *
-     * @param string $key
-     * @return null | string
-     */
-    public function get($key)
-    {
-        if (!$this->has($key)) {
-            return null;
-        }
-
-        $errors = $this->errors[$key];
-
-        if (count($errors) === 0) {
-            return null;
-        }
-
-        return $errors[0];
-    }
-
-    /**
-     * Get previous input value
-     *
-     * @param string $key
-     * @return mixed
-     */
-    public function old($key)
-    {
-        if (!array_key_exists($key, $this->requests)) {
-            return null;
-        }
-
-        return $this->requests[$key];
-    }
-
-    /**
-     * Get all error messages
-     *
-     * @return array
-     */
-    public function getErrors()
-    {
-        return $this->errors;
-    }
-
-    /**
-     * Clear all error messages
-     *
-     * @return void
-     */
-    public function clearErrors()
-    {
-        return $this->errors = [];
-    }
-
-    /**
-     * Get all requests data that captured during validation
-     *
-     * @return array
-     */
-    public function getRequests()
-    {
-        return $this->requests;
     }
 
     /**
@@ -261,11 +155,18 @@ class Validator
         return true;
     }
 
-    private function validateRangeChars($ruleValue, $inputValue)
+    /**
+     * Validate lengths of a string with min and max value
+     *
+     * @param array $ruleValue
+     * @param mixed $inputValue
+     * @return boolean
+     */
+    private function validateLengths($ruleValue, $inputValue)
     {
         $value  = trim($inputValue);
-        $from   = $ruleValue['from'];
-        $to     = $ruleValue['to'];
+        $from   = $ruleValue[0];
+        $to     = $ruleValue[1];
 
         if ((strlen($value) < $from) ||
             (strlen($value) > $to)) {

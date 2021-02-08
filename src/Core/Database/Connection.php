@@ -9,7 +9,7 @@ class Connection
     /**
      * The connection instance, because we only want one connection instance
      *
-     * @var Connection
+     * @var App\Core\Database\Connection
      */
     private static $instance = null;
     
@@ -40,7 +40,7 @@ class Connection
      * @param string $name
      * @param string $username
      * @param string $password
-     * @return Connection
+     * @return App\Core\Database\Connection
      */
     public static function make($driver, $host, $name, $username, $password)
     {
