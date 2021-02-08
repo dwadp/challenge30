@@ -33,7 +33,6 @@ class PostController extends BaseController
         $this->store();
         
         $this->view->render('post/index.php', ['posts' => $posts]);
-
     }
 
     /**
