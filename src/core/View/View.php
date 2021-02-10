@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Core;
+namespace Core\View;
 
-use App\Core\Registry;
+use Core\Application;
+use Exception;
 
 class View
 {
+    private $app;
+
     /**
      * The config instance
      *
@@ -27,29 +30,11 @@ class View
      */
     private $dependencies = [];
 
-    public function __construct()
+    public function __construct(Application $app)
     {
-        $this->config       = Registry::get('config');
+        $this->app          = $app;
+        $this->config       = $app->get('config');
         $this->viewsPath    = $this->config->get('view.path');
-    }
-
-    /**
-     * Set the dependencies list to provide to all views
-     *
-     * @param array $dependencies
-     * @return void
-     */
-    public function setDependencies($dependencies)
-    {
-        if (!is_array($dependencies)) {
-            return;
-        }
-
-        if (count($dependencies) === 0) {
-            return;
-        }
-
-        $this->dependencies = $dependencies;
     }
 
     /**
@@ -61,6 +46,8 @@ class View
      */
     public function render($path, $payload = [])
     {
+        require_once $this->app->makePath('vendor/autoload.php');
+
         $viewPath   = $this->getViewPath($path);
         $data       = $this->combinePayload($payload);
 
@@ -78,8 +65,9 @@ class View
     private function getViewPath($path)
     {
         $trimmedPath    = trim($path, '/');
-        $viewPath       = $this->viewsPath . '/' . $trimmedPath;
-        
+        $trimmedPath = $this->viewsPath . '/' . $trimmedPath;
+        $viewPath       = $this->app->makePath($trimmedPath);
+
         if (!file_exists($viewPath)) {
             throw new Exception("View \"{$trimmedPath}\" cannot be found");
         }
@@ -91,7 +79,7 @@ class View
      * Combine all dependencies with the given payload
      *
      * @param array $payload
-     * @return void
+     * @return array
      */
     private function combinePayload($payload)
     {

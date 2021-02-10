@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core;
+namespace Core\Config;
 
 class Config
 {
@@ -16,10 +16,7 @@ class Config
      *
      * @var array
      */
-    private static $options = [
-        'path'  => __DIR__ . '/config',
-        'files' => []
-    ];
+    private static $options = [];
 
     public function __construct($options = [])
     {

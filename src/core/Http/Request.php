@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core;
+namespace Core\Http;
 
 class Request
 {
@@ -111,5 +111,9 @@ class Request
         }, ARRAY_FILTER_USE_KEY);
 
         return $filtered;
+    }
+
+    public function empty() {
+        return count($this->data) === 0;
     }
 }

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Core\Database;
+namespace Core\Database\Connection;
 
 use PDO;
+use PDOException;
 
 class Connection
 {

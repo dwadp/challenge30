@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Validator;
+namespace Core\Validator;
 
 class ValidationError
 {
@@ -41,11 +41,7 @@ class ValidationError
      */
     public function has($field)
     {
-        if (!isset($this->errors[$field])) {
-            return false;
-        }
-
-        return true;
+        return isset($this->errors[$field]);
     }
 
     /**

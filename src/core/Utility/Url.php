@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core;
+namespace Core\Utility;
 
-use App\Core\Registry;
+use Core\Registry;
 
 class Url
 {
@@ -56,18 +56,45 @@ class Url
         }
 
         $host           = $_SERVER['HTTP_HOST'];
-        $requestUri     = trim($_SERVER['REQUEST_URI'], '/');
-        $segments       = explode('/', $requestUri);
         $protocol       = ($_SERVER['REQUEST_SCHEME'] === 'https') ? 'https://' : 'http://';
-
         $url            = $protocol . $host;
 
-        if ((count($segments) > 0) &&
-            ($segments[0] !== '')) {
-            $url .= '/' . $segments[0];
+        // Only when the app accessed via localhost,
+        // then we need to append the root folder of the app
+        if (($host === 'localhost') || 
+            ($host === '127.0.0.1')) {
+            $url .= '/' . $this->getRootFolder();
         }
 
         return $url;
+    }
+
+    /**
+     * Get the current project root folder name
+     *
+     * @return string
+     */
+    private function getRootFolder()
+    {
+        $trimmedDocumentRoot    = trim($_SERVER['SCRIPT_FILENAME'], '/');
+        $segments               = explode('/', $trimmedDocumentRoot);
+        $segmentsLastIndex      = count($segments) - 1;
+        $projectRoot            = '';
+
+        // Loop from the last item
+        for ($index = $segmentsLastIndex; $index > 0; $index--) {
+            $segment = $segments[$index];
+
+            // If the current segment is file then skip it
+            if (is_file($segment)) {
+                continue;
+            }
+
+            $projectRoot = $segment;
+            break;
+        }
+
+        return $projectRoot;
     }
 
     /**

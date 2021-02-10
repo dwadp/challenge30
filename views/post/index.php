@@ -10,22 +10,22 @@
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col-md-6">
-                <form action="<?php echo $url->make('index.php') ?>" class="mb-4" method="POST">
+                <form action="<?php echo url()->make('index.php') ?>" class="mb-4" method="POST">
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control<?php echo $validator->error->has('title') ? ' is-invalid' : '' ?>" id="title" name="title" placeholder="Input title" value="<?php echo $request->get('title') ?>">
-                        <?php if ($validator->error->has('title')) : ?>
+                        <input type="text" class="form-control<?php echo validator()->error->has('title') ? ' is-invalid' : '' ?>" id="title" name="title" placeholder="Input title" value="<?php echo request()->get('title') ?>">
+                        <?php if (validator()->error->has('title')) : ?>
                             <div class="invalid-feedback">
-                                <?php echo $validator->error->get('title') ?>
+                                <?php echo validator()->error->get('title') ?>
                             </div>
                         <?php endif; ?>
                     </div>
                     <div class="mb-3">
                         <label for="body" class="form-label">Body</label>
-                        <textarea class="form-control<?php echo $validator->error->has('body') ? ' is-invalid' : '' ?>" id="body" name="body" rows="3" placeholder="Input body"><?php echo $request->get('body') ?></textarea>
-                        <?php if ($validator->error->has('body')) : ?>
+                        <textarea class="form-control<?php echo validator()->error->has('body') ? ' is-invalid' : '' ?>" id="body" name="body" rows="3" placeholder="Input body"><?php echo request()->get('body') ?></textarea>
+                        <?php if (validator()->error->has('body')) : ?>
                             <div class="invalid-feedback">
-                                <?php echo $validator->error->get('body') ?>
+                                <?php echo validator()->error->get('body') ?>
                             </div>
                         <?php endif; ?>
                     </div>

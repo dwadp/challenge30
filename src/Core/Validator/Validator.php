@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\Validator;
+namespace Core\Validator;
 
-use App\Core\Validator\ValidationError;
+use Core\Validator\ValidationError;
 
 class Validator
 {

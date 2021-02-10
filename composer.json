@@ -1,8 +1,12 @@
 {
     "name": "dwadp/challenge30",
     "autoload": {
+        "files": [
+            "src/core/Support/helpers.php"
+        ],
         "psr-4": {
-            "App\\":"src/"
+            "Core\\":"src/core",
+            "App\\": "app/"
         }
     }
 }

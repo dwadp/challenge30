@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Core\Database;
+namespace Core\Database;
 
-use DateTime;
-use PDO;
-use App\Core\Registry;
+use Core\Database\Caster;
+use Core\Database\QueryBuilder;
+use Exception;
 
 class Model
 {
+    private static $instance;
+
     /**
-     * The PHP PDO instance
+     * The current model class name
      *
-     * @var PDO
+     * @var object
      */
-    private $pdo = null;
+    protected $model;
 
     /**
      * The table associated with the model
@@ -30,11 +32,25 @@ class Model
     protected $columns = [];
 
     /**
-     * The generated SQL Query
+     * The QueryBuilder instance
      *
-     * @var string
+     * @var Core\Database\QueryBuilder
      */
-    protected $query;
+    public $builder;
+
+    /**
+     * The result caster instance
+     *
+     * @var Core\Database\Caster;
+     */
+    protected $caster;
+
+    /**
+     * Wether the current table use timestamps or not
+     *
+     * @var boolean
+     */
+    protected $timestamps = true;
 
     /**
      * Set a column with a specified value
@@ -62,6 +78,12 @@ class Model
         return $this->columns[$key];
     }
 
+    protected $defaultCasts = [
+        'created_at' => 'date',
+        'updated_at' => 'date',
+        'deleted_at' => 'date'
+    ];
+
     /**
      * Column casts
      *
@@ -71,298 +93,166 @@ class Model
 
     public function __construct()
     {
-        $connection = Registry::get('connection');
+        $this->builder  = new QueryBuilder;
+        $this->caster   = new Caster($this->getCasts());
+        $this->model    = $this->getName();
 
-        $this->pdo  = $connection->getPDO();
+        $this->determineTableName();
     }
 
-    /**
-     * Construct SQL `INSERT` query
-     *
-     * @param array $data
-     * @return string
-     */
-    private function buildInsertQuery($data)
+    private function determineTableName()
     {
-        $query  = "INSERT INTO {$this->table} (";
-        $keys   = array_keys($data);
-        
-        $query  .= implode(', ', $keys) . ') VALUES (';
+        if (is_null($this->table)) {
+            $path = explode('\\', $this->model);
+            $class = array_pop($path);
 
-        foreach ($keys as $key => $column) {
-            $query .= ":{$column}";
-            
-            $lastKeyIndex = count($keys) - 1;
+            $this->table = strtolower($class) . 's';
+        }
+    }
 
-            if ($key < $lastKeyIndex) {
-                $query .= ', ';
-            }
+    private static function getInstance()
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new static;
         }
 
-        $query .= ')';
-
-        return $query;
+        return self::$instance;
     }
 
-    /**
-     * Construct SQL `SELECT` query
-     *
-     * @param string    $table
-     * @param array     $columns
-     * @param string    $additional
-     * @return string
-     */
-    private function buildSelectQuery($columns = [])
+    public function __call($method, $args)
     {
-        $query          = "SELECT ";
-        $columnsLength  = count($columns);
+        $instance = static::getInstance();
 
-        if (($columnsLength === 1) &&
-            (is_array($columns[0]))) {
-            $query  .= implode(', ', $columns[0]);
-        } elseif ($columnsLength > 1) {
-            $query  .= implode(', ', $columns);
-        } else {
-            $query  .= '*';
+        return $instance->call($instance, $method, ...$args);
+    }
+
+    public static function __callStatic($method, $args)
+    {
+        $instance = static::getInstance();
+
+        return $instance->call($instance, $method, ...$args);
+    }
+
+    private function getCasts()
+    {
+        $filteredCasts = array_filter($this->casts, function($cast) {
+            return !in_array($cast, array_keys($this->defaultCasts));
+        }, ARRAY_FILTER_USE_KEY);
+
+        if ($this->timestamps) {
+            return array_merge($filteredCasts, $this->defaultCasts);
         }
 
-        $query .= " FROM {$this->table}";
-
-        return $query;
+        return $filteredCasts;
     }
 
-    /**
-     * Build SQL parameters binding
-     * Example Result: [':column' => 'value']
-     *
-     * @param array $data
-     * @return array
-     */
-    private function buildBindParams($data)
+    protected function getName()
     {
-        $params = [];
+        return get_called_class();
+    }
 
-        foreach ($data as $key => $value) {
-            $params[":{$key}"] = $value;
+    private function call($object, $method, ...$args)
+    {
+        $methodName = 'call'.ucwords($method);
+
+        if (!method_exists($object, $methodName)) {
+            throw new Exception("Method [{$method}] doesn't exists on class [{$object->getName()}]");
         }
 
-        return $params;
+        return $object->{$methodName}(...$args);
     }
 
-    /**
+     /**
      * Store the data to the given table
      *
      * @param string    $table
      * @param array     $data
      * @return void
      */
-    public function insert($data)
+    public function callCreate($data)
     {
-        $query      = $this->buildInsertQuery($data);
-        $params     = $this->buildBindParams($data);
-        $statement  = $this->pdo->prepare($query);
-        
-        $statement->execute($params);
+        if ($this->timestamps) {
+            $now                = date('Y-m-d H:i:s');
+            $data['created_at'] = $now;
+            $data['updated_at'] = $now;
+        }
+
+        $this->builder->insert($this->table, $data);
     }
 
-    /**
-     * Get all data from the given table
-     *
-     * @param string    $table
-     * @param array     $columns
-     * @param string    $additional
-     * @return array
-     */
-    public function select(...$columns)
+    public function callWhere(...$conditions)
     {
-        $this->query = $this->buildSelectQuery($columns);
+        $this->builder->where(...$conditions);
 
         return $this;
     }
 
-    /**
-     * Check if options passed to order method is only single order
-     *
-     * @param array $options
-     * @return boolean
-     */
-    private function isSingleOrderOption($options)
+    public function callHaving(...$conditions)
     {
-        if (count($options) !== 2) {
-            return false;
-        }
+        $this->builder->having(...$conditions);
 
-        foreach ($options as $option) {
-            if (!is_string($option)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Build multiple order query if the options passed to order method is array
-     *
-     * @param array $options
-     * @return string
-     */
-    private function buildMultipleOrderQuery($options)
-    {
-        $query  = ' ORDER BY ';
-        $orders = [];
-
-        foreach ($options as $key => $option) {
-            $orderDirection = strtoupper($option);
-            $orders[]       = "{$key} {$orderDirection}";
-        }
-
-        $query .= implode(', ', $orders);
-
-        return $query;
-    }
-
-    /**
-     * Order query 'ORDER BY'
-     *
-     * @param string|array ...$options
-     * @return QueryBuilder
-     */
-    public function order(...$options)
-    {
-        if (count($options) === 0) {
-            return $this;
-        }
-
-        if ($this->isSingleOrderOption($options)) {
-            $orderColumn    = $options[0];
-            $orderDirection = strtoupper($options[1]);
-
-            $this->query    .= " ORDER BY {$orderColumn} {$orderDirection}";
-
-            return $this;
-        }
-
-        $this->query .= $this->buildMultipleOrderQuery($options[0]);
-        
         return $this;
     }
 
-    /**
-     * Fetch only one row from the database
-     *
-     * @return mixed
-     */
-    public function first()
+    public function callGroup(...$conditions)
     {
-        $this->query    .= ' LIMIT 1';
+        $this->builder->group(...$conditions);
 
-        $statement      = $this->pdo->prepare($this->query);
-        $childClass     = get_called_class();
-
-        $statement->execute();
-
-        $result = $statement->fetchObject($childClass);
-
-        return $this->castResult($result);
+        return $this;
     }
 
-    /**
-     * Fetch all object retrieved from the query
-     *
-     * @return mixed
-     */
-    public function get()
+    public function callOrder(...$options)
     {
-        $statement  = $this->pdo->prepare($this->query);
-        $childClass = get_called_class();
+        $this->builder->order(...$options);
 
-        $statement->execute();
-
-        $result = $statement->fetchAll(PDO::FETCH_CLASS, $childClass);
-
-        return $this->castResult($result);
+        return $this;
     }
 
-    /**
-     * Cast the result if there are casts assigned
-     *
-     * @param array|object $result
-     * @return array
-     */
-    private function castResult($result)
+    public function callTake($length)
     {
-        if (count($this->casts) === 0) {
-            return $result;
-        }
+        $this->builder->take($length);
 
-        if (is_object($result)) {
-            return $this->castSingleResult($result);
-        }
-
-        return $this->castMultipleResult($result);
+        return $this;
     }
 
-    /**
-     * Casts all columns which specified in casts in a single result object
-     *
-     * @param object $result
-     * @return object
-     */
-    private function castSingleResult($result)
+    public function callSkip($length)
     {
-        foreach ($this->casts as $key => $cast) {
-            $result->{$key} = $this->castColumn($cast, $result->{$key});
-        }
+        $this->builder->skip($length);
 
-        return $result;
+        return $this;
     }
 
-    /**
-     * Casts all columns which specified in casts in multiple result object
-     *
-     * @param array $result
-     * @return array
-     */
-    private function castMultipleResult($result)
+    public function callGet(...$columns)
     {
-        foreach ($result as $key => $model) {
-            foreach ($model->casts as $key => $cast) {
-                $model->{$key} = $this->castColumn($cast, $model->{$key});
-            }
+        $this->select($this->table, ...$columns);
+
+        if ($this->timestamps) {
+            $this->order('created_at', 'ASC');
         }
 
-        return $result;
+        return $this->caster->cast(
+            $this->builder->fetch($this->model)
+        );
     }
 
-    /**
-     * Determine which cast should be applied to specific column
-     *
-     * @param string    $cast
-     * @param mixed     $value
-     * @return mixed
-     */
-    private function castColumn($cast, $value)
+    public function callFirst(...$columns)
     {
-        switch ($cast) {
-            case 'date':
-                return $this->castToDate($value);
-        }
+        $this->select($this->table, ...$columns);
+
+        return $this->caster->cast(
+            $this->builder->first($this->model)
+        );
     }
 
-    /**
-     * Casting for 'date'
-     *
-     * @param string $value
-     * @return DateTime
-     */
-    private function castToDate($value)
+    public function callSelect(...$columns)
     {
-        if (!$value) {
-            return null;
-        }
+        $this->builder->select(...$columns);
+        return $this;
+    }
 
-        return DateTime::createFromFormat('Y-m-d H:i:s', $value);
+    public function callDelete()
+    {
+        $this->builder->delete($this->table);
     }
 }
 
