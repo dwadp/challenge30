@@ -14,19 +14,18 @@ class PostController extends BaseController
      */
     public function index()
     {
-        $posts = Post::where('id', '>', 2)->get();
+        $posts = Post::all();
 
         $this->store();
         
         $this->view->render('post/index.php', ['posts' => $posts]);
-
     }
 
     /**
      * Validate data based on the given rules
      *
-     * @param array $data
-     * @return boolean
+     * @param   array $data
+     * @return  boolean
      */
     private function validate($data)
     {
@@ -53,10 +52,9 @@ class PostController extends BaseController
      */
     public function store()
     {
-        $request = $this->request->only(['title', 'body']);
+        $request = $this->request->all();
 
-        $this->validate($request);
-
+        
         if (($this->validate($request)) &&
             (!$this->request->empty())) {
             Post::create($request);

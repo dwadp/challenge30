@@ -23,13 +23,6 @@ class View
      */
     private $viewsPath = '';
 
-    /**
-     * The dependencies list
-     *
-     * @var array
-     */
-    private $dependencies = [];
-
     public function __construct(Application $app)
     {
         $this->app          = $app;
@@ -40,16 +33,15 @@ class View
     /**
      * Render a given view and provide it with the given data
      *
-     * @param string    $path
-     * @param array     $payload
-     * @return void
+     * @param   string    $path
+     * @param   array     $payload
+     * @return  void
      */
-    public function render($path, $payload = [])
+    public function render($path, $data = [])
     {
         require_once $this->app->makePath('vendor/autoload.php');
 
         $viewPath   = $this->getViewPath($path);
-        $data       = $this->combinePayload($payload);
 
         extract($data);
 
@@ -59,13 +51,13 @@ class View
     /**
      * Get the view path
      *
-     * @param string $path
-     * @return void
+     * @param   string $path
+     * @return  void
      */
     private function getViewPath($path)
     {
         $trimmedPath    = trim($path, '/');
-        $trimmedPath = $this->viewsPath . '/' . $trimmedPath;
+        $trimmedPath    = $this->viewsPath . '/' . $trimmedPath;
         $viewPath       = $this->app->makePath($trimmedPath);
 
         if (!file_exists($viewPath)) {
@@ -73,36 +65,5 @@ class View
         }
 
         return $viewPath;
-    }
-
-    /**
-     * Combine all dependencies with the given payload
-     *
-     * @param array $payload
-     * @return array
-     */
-    private function combinePayload($payload)
-    {
-        $combined = [];
-
-        foreach ($this->dependencies as $key => $dependency) {
-            $combined[$key] = $dependency;
-        }
-
-        if (!is_array($payload)) {
-            return $combined;
-        }
-
-        foreach ($payload as $key => $data) {
-            // The value should be an associative array
-            // If the given payload is numerical array, it should be skipped
-            if (is_numeric($key)) {
-                continue;
-            }
-
-            $combined[$key] = $data;
-        }
-
-        return $combined;
     }
 }

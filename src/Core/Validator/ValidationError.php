@@ -14,9 +14,9 @@ class ValidationError
     /**
      * Set error message
      *
-     * @param string $key
-     * @param string $value
-     * @return void
+     * @param   string $key
+     * @param   string $value
+     * @return  void
      */
     public function set($field, $message)
     {
@@ -36,8 +36,8 @@ class ValidationError
     /**
      * Check if error exists by specific field/key
      *
-     * @param string $key
-     * @return boolean
+     * @param   string $key
+     * @return  boolean
      */
     public function has($field)
     {
@@ -47,22 +47,15 @@ class ValidationError
     /**
      * Get the first error message captured by a specific field/key
      *
-     * @param string $key
-     * @return null|string
+     * @param   string $key
+     * @return  null|string
      */
     public function get($field)
     {
-        if (!$this->has($field)) {
-            return null;
+        if (($this->has($field)) && 
+            (count($this->errors[$field]) > 0)) {
+            return $this->errors[$field][0];
         }
-
-        $errors = $this->errors[$field];
-
-        if (count($errors) === 0) {
-            return null;
-        }
-
-        return $errors[0];
     }
 
     /**

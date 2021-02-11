@@ -21,29 +21,28 @@ class Validator
     /**
      * Validate with the given rules and data
      *
-     * @param array $rules
-     * @param array $data
-     * @return void
+     * @param   array $rules
+     * @param   array $data
+     * @return  void
      */
     public function validate($rules, $data)
     {
         foreach ($rules as $key => $rule) {
-            if (!array_key_exists($key, $data)) {
-                continue;
-            }
+            if (array_key_exists($key, $data)) {
+                $this->requests[$key] = trim($data[$key]);
 
-            $this->validateIndividual($rule, $key, $data[$key]);
-            $this->requests[$key] = trim($data[$key]);
+                $this->validateIndividual($rule, $key, $data[$key]);
+            }
         }
     }
 
     /**
      * Validate individual field with the given rules and value
      *
-     * @param array     $rules
-     * @param string    $key
-     * @param mixed     $value
-     * @return void
+     * @param   array     $rules
+     * @param   string    $key
+     * @param   mixed     $value
+     * @return  void
      */
     private function validateIndividual($rules, $key, $value)
     {
@@ -56,123 +55,104 @@ class Validator
      * Determine how the input will be validated with the given rule 
      * and set the error based on the rule
      *
-     * @param string    $ruleKey
-     * @param mixed     $ruleValue
-     * @param string    $inputKey
-     * @param mixed     $inputValue
-     * @return void
+     * @param   string    $ruleKey
+     * @param   mixed     $ruleValue
+     * @param   string    $inputKey
+     * @param   mixed     $inputValue
+     * @return  void
      */
     private function validateRule($ruleKey, $ruleValue, $inputKey, $inputValue)
     {
-        $label = ucfirst($inputKey);
+        $handler = 'validate' . $this->getLabel($ruleKey);
 
-        switch ($ruleKey) {
-            case 'required':
-                if (!$this->validateRequired($inputValue)) {
-                    $this->error->set($inputKey, "{$label} is required");
-                }
-                break;
-            case 'minlength':
-                if (!$this->validateMinLength($ruleValue, $inputValue)) {
-                    $this->error->set(
-                        $inputKey,
-                        "{$label} must be at least {$ruleValue} characters long"
-                    );
-                }
-                break;
-            case 'maxlength':
-                if (!$this->validateMaxLength($ruleValue, $inputValue)) {
-                    $this->error->set(
-                        $inputKey,
-                        "{$label} must be set at maximum of {$ruleValue} characters long"
-                    );
-                }
-                break;
-            case 'lengths':
-                if (!$this->validateLengths($ruleValue, $inputValue)) {
-                    $from   = $ruleValue[0];
-                    $to     = $ruleValue[1];
-
-                    $this->error->set(
-                        $inputKey,
-                        "{$label} must be {$from} to {$to} characters long"
-                    );
-                }
-                break;
+        if (method_exists($this, $handler)) {
+            $this->$handler($ruleValue, $inputKey, $inputValue);
         }
     }
 
     /**
      * Handle validate "required" rule
      *
-     * @param mixed $value
-     * @return boolean
+     * @param   mixed $value
+     * @return  boolean
      */
-    private function validateRequired($value)
+    private function validateRequired($rule, $field, $value)
     {
         if (($value === null) ||
             (trim($value) === '') || 
             ($value === 0)) {
-            return false;
+            $this->error->set($field, "{$this->getLabel($field)} is required");
         }
+    }
 
-        return true;
+    /**
+     * Generate a label
+     *
+     * @param   string $name
+     * @return  string
+     */
+    private function getLabel($name)
+    {
+        return ucwords($name);
     }
 
     /**
      * Handle validate "minlength" rule
      *
-     * @param mixed $ruleValue
-     * @param mixed $inputValue
-     * @return boolean
+     * @param   mixed $ruleValue
+     * @param   mixed $inputValue
+     * @return  boolean
      */
-    private function validateMinLength($ruleValue, $inputValue)
+    private function validateMinLength($rule, $field, $value)
     {
-        $inputLength = strlen(trim($inputValue));
+        $inputLength = strlen(trim($value));
 
-        if ($inputLength < $ruleValue) {
-            return false;
+        if ($inputLength < $rule) {
+            $this->error->set(
+                $value,
+                "{$this->getLabel($field)} must be at least {$rule} characters long"
+            );
         }
-
-        return true;
     }
 
     /**
      * Handle validate "maxlength" rule
      *
-     * @param mixed $ruleValue
-     * @param mixed $inputValue
-     * @return boolean
+     * @param   mixed $ruleValue
+     * @param   mixed $inputValue
+     * @return  boolean
      */
-    private function validateMaxLength($ruleValue, $inputValue)
+    private function validateMaxLength($rule, $field, $value)
     {
-        $inputLength = strlen(trim($inputValue));
+        $inputLength = strlen(trim($value));
 
-        if ($inputLength > $ruleValue) {
-            return false;
+        if ($inputLength > $rule) {
+            $this->error->set(
+                $value,
+                "{$this->getLabel($field)} must be set at maximum of {$rule} characters long"
+            );
         }
-
-        return true;
     }
 
     /**
      * Validate lengths of a string with min and max value
      *
-     * @param array $ruleValue
-     * @param mixed $inputValue
-     * @return boolean
+     * @param   array $ruleValue
+     * @param   mixed $inputValue
+     * @return  boolean
      */
-    private function validateLengths($ruleValue, $inputValue)
+    private function validateLengths($rule, $field, $value)
     {
-        $value  = trim($inputValue);
-        $from   = $ruleValue[0];
-        $to     = $ruleValue[1];
+        $value  = trim($value);
+        $from   = $rule[0];
+        $to     = $rule[1];
 
         if ((strlen($value) < $from) ||
             (strlen($value) > $to)) {
-            return false;
+            $this->error->set(
+                $field,
+                "{$this->getLabel($field)} must be {$from} to {$to} characters long"
+            );
         }
-
-        return true;
     }
 }

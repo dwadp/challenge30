@@ -8,6 +8,12 @@ use Core\Contracts\Factory;
 
 class ConfigFactory implements Factory
 {
+    /**
+     * Make the config instance
+     *
+     * @param Core\Application $app
+     * @return Core\Config\Config
+     */
     public static function make(Application $app)
     {
         $configPath = $app->makePath('config');

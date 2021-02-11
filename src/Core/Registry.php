@@ -14,9 +14,9 @@ class Registry
     /**
      * Register a new dependency
      *
-     * @param string $name
-     * @param object $object
-     * @return void
+     * @param   string $name
+     * @param   object $object
+     * @return  void
      */
     public static function register($name, $object)
     {
@@ -26,15 +26,13 @@ class Registry
     /**
      * Get registered dependency
      *
-     * @param string $name
-     * @return null|object
+     * @param   string $name
+     * @return  null|object
      */
     public static function get($name)
     {
-        if (!array_key_exists($name, self::$dependencies)) {
-            return null;
+        if (array_key_exists($name, self::$dependencies)) {
+            return self::$dependencies[$name];
         }
-
-        return self::$dependencies[$name];
     }
 }

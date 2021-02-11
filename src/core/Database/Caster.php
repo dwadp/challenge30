@@ -14,7 +14,8 @@ class Caster
     private $availableCasts = [
         'date',
         'int',
-        'boolean'
+        'boolean',
+        'string'
     ];
 
     /**
@@ -32,8 +33,8 @@ class Caster
     /**
      * Cast array or object
      *
-     * @param array|object $result
-     * @return array
+     * @param   array|object $result
+     * @return  array
      */
     public function cast($result)
     {
@@ -47,12 +48,12 @@ class Caster
     /**
      * Casts all columns which specified in casts in a single result object
      *
-     * @param object $result
-     * @return object
+     * @param   object $result
+     * @return  object
      */
     private function castSingleResult($casts, $result)
     {
-        if (!$result) {
+        if ($result) {
             foreach ($casts as $key => $cast) {
                 $result->{$key} = $this->castColumn($cast, $result->{$key});
             }
@@ -64,8 +65,8 @@ class Caster
     /**
      * Casts all columns which specified in casts in multiple result object
      *
-     * @param array $result
-     * @return array
+     * @param   array $result
+     * @return  array
      */
     private function castMultipleResult($casts, $result)
     {
@@ -85,8 +86,8 @@ class Caster
     /**
      * Check if the current cast can be applied
      *
-     * @param string $cast
-     * @return boolean
+     * @param   string $cast
+     * @return  boolean
      */
     private function canBeCasted($cast)
     {
@@ -96,9 +97,9 @@ class Caster
     /**
      * Determine which cast should be applied to specific column
      *
-     * @param string    $cast
-     * @param mixed     $value
-     * @return mixed
+     * @param   string    $cast
+     * @param   mixed     $value
+     * @return  mixed
      */
     private function castColumn($cast, $value)
     {
@@ -109,15 +110,15 @@ class Caster
         $castHandler = 'castTo'.$this->makeCastHandlerName($cast);
 
         if (method_exists($this, $castHandler)) {
-            return $this->{$castHandler}($value);
+            return $this->$castHandler($value);
         }
     }
 
     /**
      * Build caster handler name
      *
-     * @param string $cast
-     * @return string
+     * @param   string $cast
+     * @return  string
      */
     private function makeCastHandlerName($cast)
     {
@@ -127,8 +128,8 @@ class Caster
     /**
      * Casting for 'date'
      *
-     * @param string $value
-     * @return DateTime
+     * @param   string $value
+     * @return  DateTime
      */
     private function castToDate($value)
     {
@@ -142,8 +143,8 @@ class Caster
     /**
      * Casting for 'int'
      *
-     * @param string $value
-     * @return int|null
+     * @param   string $value
+     * @return  int|null
      */
     private function castToInt($value)
     {
@@ -153,10 +154,21 @@ class Caster
     }
 
     /**
+     * Casting for 'string'
+     *
+     * @param   string $value
+     * @return  int|null
+     */
+    private function castToString($value)
+    {
+        return (string) $value;
+    }
+
+    /**
      * Casting for 'boolean'
      *
-     * @param string $value
-     * @return boolean
+     * @param   string $value
+     * @return  boolean
      */
     private function castToBoolean($value)
     {
