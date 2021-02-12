@@ -14,6 +14,11 @@ use ReflectionClass;
 
 class Application
 {
+    /**
+     * The application instance
+     *
+     * @var Core\Application
+     */
     public static $instance;
 
     /**
@@ -52,35 +57,79 @@ class Application
         self::$instance->bootDependencies();
     }
 
+    /**
+     * Prevent to use the 'new' keyword to make the application
+     */
     private function __construct() {}
 
+    /**
+     * Prevent the application to be cloned
+     *
+     * @return void
+     */
     private function __clone() {}
 
+    /**
+     * Get a dependency by their name
+     *
+     * @param   string $name
+     * @return  null|object
+     */
     public function get($name)
     {
         return Registry::get($name);
     }
 
+    /**
+     * Register a new dependency
+     *
+     * @param   string $name
+     * @param   object $dependency
+     * @return  void
+     */
     public function register($name, $dependency)
     {
         Registry::register($name, $dependency);
     }
 
+    /**
+     * Set the application base path
+     *
+     * @param   string $basePath
+     * @return  void
+     */
     public function setBasePath($basePath)
     {
         static::$basePath = $basePath;
     }
 
+    /**
+     * Get the application base path
+     *
+     * @return string
+     */
     public function getBasePath()
     {
         return static::$basePath;
     }
 
+    /**
+     * Combined the given path with the base path
+     *
+     * @param   string $path
+     * @return  string
+     */
     public function makePath($path)
     {
         return $this->getBasePath() . '/' . $path;
     }
 
+    /**
+     * Initialize the application and register it to the registry
+     *
+     * @param   string $basePath
+     * @return  void
+     */
     private function initApplication($basePath)
     {
         self::$instance->setBasePath($basePath);
@@ -110,11 +159,11 @@ class Application
     }
 
     /**
-     * Every class that implements 'Factory' should be instantiate using 'make' method
+     * Every class that implements 'Factory' should be instantiate using the 'make' method
      *
-     * @param string $key
-     * @param Core\Contracts\Factory $class
-     * @return void
+     * @param   string $key
+     * @param   Core\Contracts\Factory $class
+     * @return  void
      */
     protected function makeWithFactory($key, $class)
     {

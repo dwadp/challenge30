@@ -36,12 +36,12 @@ class Connection
     /**
      * Connect to the database and return only single instance object
      *
-     * @param string $driver
-     * @param string $host
-     * @param string $name
-     * @param string $username
-     * @param string $password
-     * @return App\Core\Database\Connection
+     * @param   string $driver
+     * @param   string $host
+     * @param   string $name
+     * @param   string $username
+     * @param   string $password
+     * @return  App\Core\Database\Connection
      */
     public static function make($driver, $host, $name, $username, $password)
     {
@@ -53,12 +53,12 @@ class Connection
 
                self::$pdo = $pdo;
                self::$instance = new self;
-
-               return self::$instance;
 			} catch (PDOException $e) { 
 			   die('PDO CONNECTION ERROR: ' . $e->getMessage() . '<br/>');
 			}
         }
+
+        return self::$instance;
     }
 
     /**

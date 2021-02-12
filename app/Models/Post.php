@@ -14,11 +14,18 @@ class Post extends Model
     protected $table = 'posts';
 
     /**
-     * Define columns casts
+     * Whitelist the table columns
      *
      * @var array
      */
-    protected $casts = [
-        'id' => 'int'
+    protected $whitelists = [
+        'title', 'body'
     ];
+
+    /**
+     * Blacklist the table columns
+     */
+    // protected $blacklists = [
+    //     'submit'
+    // ];
 }

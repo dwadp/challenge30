@@ -13,8 +13,8 @@ class BaseController
     /**
      * Redirect to intended page
      *
-     * @param string $location
-     * @return void
+     * @param   string $location
+     * @return  void
      */
     protected function redirect($location)
     {
@@ -23,6 +23,13 @@ class BaseController
         header("Location: {$url}");
     }
 
+    /**
+     * Handle when children class accessing a property
+     * and automatically will get dependency from the application
+     *
+     * @param   string $name
+     * @return  null|object
+     */
     public function __get($name)
     {
         return app()->get($name);

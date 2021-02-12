@@ -8,6 +8,12 @@ use Core\Database\Connection\Connection;
 
 class ConnectionFactory implements Factory
 {
+    /**
+     * Make the connection instance
+     *
+     * @param   Core\Application $app
+     * @return  Core\Database\Connection
+     */
     public static function make(Application $app)
     {
         $config = $app->get('config');

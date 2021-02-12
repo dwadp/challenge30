@@ -34,8 +34,7 @@ class Config
      */
     private function loadConfigurationFiles()
     {
-        $config     = $this;
-        $options    = self::$options;
+        $options = self::$options;
 
         foreach ($options['files'] as $name) {
             $path   = $options['path'] . '/' . $name . '.php';
@@ -49,9 +48,9 @@ class Config
     /**
      * Add new configuration data
      *
-     * @param string $key
-     * @param array $configs
-     * @return void
+     * @param   string  $key
+     * @param   array   $configs
+     * @return  void
      */
     public function add($key, $configs)
     {
@@ -61,23 +60,19 @@ class Config
     /**
      * Check if configuration exists by a specific key
      *
-     * @param string $key
-     * @return boolean
+     * @param   string  $key
+     * @return  boolean
      */
     public function has($key)
     {
-        if (!array_key_exists($key, self::$configs)) {
-            return false;
-        }
-
-        return true;
+        return array_key_exists($key, self::$configs);
     }
 
     /**
      * Get configuration value by a specific key
      *
-     * @param string $key
-     * @return mixed
+     * @param   string $key
+     * @return  mixed
      */
     public function get($key, $default = '')
     {
@@ -98,13 +93,24 @@ class Config
         return $config;
     }
 
+    /**
+     * Determine if should use default instead of the value
+     *
+     * @param   mixed $value
+     * @param   mixed $default
+     * @return  boolean
+     */
     private function shouldUseDefault($value, $default)
     {
-        if ((is_bool($value)) && $value === null && $default) {
+        if ((is_bool($value)) && 
+            ($value === null) &&
+            ($default)) {
             return true;
         }
 
-        if (is_string($value) && $value === '' && $default !== '') {
+        if ((is_string($value)) &&
+            ($value === '') &&
+            ($default !== '')) {
             return true;
         }
 
@@ -115,27 +121,21 @@ class Config
      * Check is the given configuration key is nested
      * Example: app.level1.level2
      *
-     * @param string $key
-     * @return boolean
+     * @param   string $key
+     * @return  boolean
      */
     private function isNestedKey($key)
     {
-        $isNested = preg_match('/\./', $key);
-
-        if ($isNested > 0) {
-            return true;
-        }
-
-        return false;
+        return preg_match('/\./', $key) > 0;
     }
 
     /**
      * Get the actual configuration value with a nested key
      *
-     * @param string $key
-     * @param string $parentKey
-     * @param array $configs
-     * @return mixed
+     * @param   string  $key
+     * @param   string  $parentKey
+     * @param   array   $configs
+     * @return  mixed
      */
     private function getNested($key, $parentKey = '', $configs = [], $default = '')
     {
@@ -195,17 +195,15 @@ class Config
     /**
      * Get all keys without their parent key
      *
-     * @param string $parentKey
-     * @param array $keys
-     * @return array
+     * @param   string  $parentKey
+     * @param   array   $keys
+     * @return  array
      */
     private function getKeysWithoutParent($parentKey, $keys)
     {
-        $filteredKeys = array_filter($keys, function($key) use ($parentKey) {
+        return array_filter($keys, function($key) use ($parentKey) {
             return ($key !== $parentKey);
         });
-
-        return $filteredKeys;
     }
 
     /**
@@ -213,23 +211,21 @@ class Config
      * Example Parent Key: app.level1.level2
      * Example Result: level1.level2
      *
-     * @param string $parentKey
-     * @param array $keys
-     * @return string
+     * @param   string  $parentKey
+     * @param   array   $keys
+     * @return  string
      */
     private function getNestedKey($parentKey, $keys)
     {
-        $filteredKeys = $this->getKeysWithoutParent($parentKey, $keys);
-
-        return implode('.', $filteredKeys);
+        return implode('.', $this->getKeysWithoutParent($parentKey, $keys));
     }
 
     /**
      * Get the remaining keys from nested key without a parent key
      *
-     * @param string $parentKey
-     * @param array $keys
-     * @return array
+     * @param   string  $parentKey
+     * @param   array   $keys
+     * @return  array
      */
     private function getRemainingKeys($parentKey, $keys)
     {

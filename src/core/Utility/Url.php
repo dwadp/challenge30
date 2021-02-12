@@ -21,8 +21,8 @@ class Url
     /**
      * Make a full url based on the 'baseUrl' that has been set in configuration file
      *
-     * @param string $path
-     * @return string
+     * @param   string $path
+     * @return  string
      */
     public function make($path = '')
     {
@@ -30,10 +30,10 @@ class Url
     }
 
     /**
-     * Build the full url with a path
+     * Build the full url with a given path
      *
-     * @param string    $path
-     * @return string
+     * @param   string $path
+     * @return  string
      */
     private function buildFullUrl($path = '')
     {
@@ -46,8 +46,8 @@ class Url
     /**
      * Get request url without the request path
      *
-     * @param string $baseUrl
-     * @return string
+     * @param   string $baseUrl
+     * @return  string
      */
     private function getRequestUrl($baseUrl = '')
     {
@@ -85,13 +85,11 @@ class Url
         for ($index = $segmentsLastIndex; $index > 0; $index--) {
             $segment = $segments[$index];
 
-            // If the current segment is file then skip it
-            if (is_file($segment)) {
-                continue;
+            // If the current segment not is file then break out the loop
+            if (!is_file($segment)) {
+                $projectRoot = $segment;
+                break;
             }
-
-            $projectRoot = $segment;
-            break;
         }
 
         return $projectRoot;
@@ -100,9 +98,9 @@ class Url
     /**
      * Append path to the given url
      *
-     * @param string $url
-     * @param string $path
-     * @return string
+     * @param   string $url
+     * @param   string $path
+     * @return  string
      */
     private function appendPath($url, $path = '')
     {

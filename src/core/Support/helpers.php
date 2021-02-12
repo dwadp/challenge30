@@ -37,7 +37,7 @@ if (!function_exists('url')) {
 
 if (!function_exists('request')) {
     /**
-     * Get url instance
+     * Get request instance
      *
      * @return Core\Http\Request
      */
@@ -48,11 +48,29 @@ if (!function_exists('request')) {
 
 if (!function_exists('config')) {
     /**
-     * Get url instance
+     * Get config instance
      *
      * @return Core\Config\Config
      */
     function config() {
         return app()->get('config');
+    }
+}
+
+if (!function_exists('now')) {
+    /**
+     * Create a datetime object with default format of Y-m-d H:i:s
+     *
+     * @param   string $format
+     * @return  string|DateTime
+     */
+    function now($format = '') {
+        $now = new DateTime();
+
+        if ($format) {
+            return $now->format($format);
+        }
+
+        return $now;
     }
 }

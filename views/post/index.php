@@ -29,7 +29,7 @@
                             </div>
                         <?php endif; ?>
                     </div>
-                    <button class="btn btn-primary" type="submit" name="submit">Submit</button>
+                    <button class="btn btn-primary" type="submit">Submit</button>
                 </form>
         
                 <?php foreach ($posts as $post) : ?>
