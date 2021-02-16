@@ -2,10 +2,10 @@
     "name": "dwadp/challenge30",
     "autoload": {
         "files": [
-            "src/core/Support/helpers.php"
+            "core/Support/helpers.php"
         ],
         "psr-4": {
-            "Core\\":"src/core",
+            "Core\\":"core/",
             "App\\": "app/"
         }
     }

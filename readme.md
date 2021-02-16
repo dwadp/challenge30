@@ -4,7 +4,7 @@
 3. Open terminal and type `cd to/project/folder` and run `composer dump-autoload -o`
 
 ### Project Configuration
-1. Copy all file that has suffix `example.php` and paste it without the suffix. Or you can run the command below individually:
+1. Copy all file that has suffix `example.php` and paste without it's suffix. Or you can run the command below individually:
 
 ```sh
 cp ./config/app-example.php ./config/app.php

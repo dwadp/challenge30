@@ -198,17 +198,6 @@ class Model
     }
 
     /**
-     * Check if the model using blacklists
-     *
-     * @return boolean
-     */
-    private function useBlacklists()
-    {
-        return ((count($this->blacklists) > 0) && 
-                (count($this->whitelists) === 0));
-    }
-
-    /**
      * Filter the data before proceeding to the next function calls
      *
      * @param   array $data
