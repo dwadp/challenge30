@@ -54,7 +54,6 @@ class PostController extends BaseController
     {
         $request = $this->request->all();
 
-        
         if (($this->validate($request)) &&
             (!$this->request->empty())) {
             Post::create($request);

@@ -18,14 +18,7 @@ class Post extends Model
      *
      * @var array
      */
-    protected $whitelists = [
+    protected $fillable = [
         'title', 'body'
     ];
-
-    /**
-     * Blacklist the table columns
-     */
-    // protected $blacklists = [
-    //     'submit'
-    // ];
 }

@@ -26,7 +26,8 @@ CREATE TABLE `posts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(32) NOT NULL,
   `body` varchar(200) NOT NULL,
-  `created_at` datetime NOT NULL,
+  `created_at` datetime,
+  `updated_at` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;

@@ -16,25 +16,18 @@ class Model
     protected $table;
 
     /**
-     * Lists of database table columns associated to the model
+     * List of all columns that allowed to be filled in
+     *
+     * @var array
+     */
+    protected $fillable  = [];
+
+    /**
+     * Lists of all columns in the database table
      *
      * @var array
      */
     protected $columns  = [];
-
-    /**
-     * List of all columns that are allowed to insert / update the value
-     *
-     * @var array
-     */
-    protected $whitelists = [];
-
-    /**
-     * List of all columns that are not allowed to insert / update the value
-     *
-     * @var array
-     */
-    protected $blacklists = [];
 
     /**
      * The QueryBuilder instance
@@ -223,22 +216,13 @@ class Model
      */
     private function filterData($data)
     {
-        // Either whitelists or blacklists are allowed, not both
-        if ((count($this->whitelists) > 0) &&
-            (count($this->blacklists) > 0)) {
-            throw new Exception("Please set either 'whitelists' or 'blacklists' columns. You can't use both.");
-        }
-
-        // If both whitelists and blacklists are empty skip the filtering
-        if ((count($this->whitelists) === 0) &&
-            (count($this->blacklists)) === 0) {
+        // If fillable empty, then just return the whole data
+        if (count($this->fillable) === 0) {
             return $data;
         }
 
         return array_filter($data, function($field) {
-            return $this->useBlacklists() ? 
-                        !in_array($field, $this->blacklists) :
-                        in_array($field, $this->whitelists);
+            return in_array($field, $this->fillable);
         }, ARRAY_FILTER_USE_KEY);
     }
 
