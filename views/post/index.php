@@ -13,7 +13,7 @@
                 <form action="<?php echo url()->make('index.php') ?>" class="mb-4" method="POST">
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control<?php echo validator()->error->has('title') ? ' is-invalid' : '' ?>" id="title" name="title" placeholder="Input title" value="<?php echo request()->get('title') ?>">
+                        <input type="text" class="form-control<?php echo validator()->error->has('title') ? ' is-invalid' : '' ?>" id="title" name="title" placeholder="Input title" value="<?php echo request()->input->old('title') ?>">
                         <?php if (validator()->error->has('title')) : ?>
                             <div class="invalid-feedback">
                                 <?php echo validator()->error->get('title') ?>
@@ -22,7 +22,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="body" class="form-label">Body</label>
-                        <textarea class="form-control<?php echo validator()->error->has('body') ? ' is-invalid' : '' ?>" id="body" name="body" rows="3" placeholder="Input body"><?php echo request()->get('body') ?></textarea>
+                        <textarea class="form-control<?php echo validator()->error->has('body') ? ' is-invalid' : '' ?>" id="body" name="body" rows="3" placeholder="Input body"><?php echo request()->input->old('body') ?></textarea>
                         <?php if (validator()->error->has('body')) : ?>
                             <div class="invalid-feedback">
                                 <?php echo validator()->error->get('body') ?>
@@ -36,8 +36,8 @@
                     <div class="row mb-2">
                         <div class="card col" style="width: 18rem;">
                             <div class="card-body">
-                                <h5 class="card-title"><?php echo $post->title ?></h5>
-                                <p class="card-text mb=3"><?php echo $post->body ?></p>
+                                <h5 class="card-title"><?php echo e($post->title) ?></h5>
+                                <p class="card-text mb=3"><?php echo e($post->body) ?></p>
                                 <p class="card-text">
                                     <small>
                                         <?php echo $post->created_at->format('d-m-Y H:i') ?>

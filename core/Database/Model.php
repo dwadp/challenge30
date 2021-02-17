@@ -176,7 +176,7 @@ class Model
             throw new Exception("Method [{$name}] doesn't exists on class [{$this->getName()}]");
         }
 
-        return $this->$method(...$args);
+        return call_user_func([$this, $method], ...$args);
     }
 
     /**

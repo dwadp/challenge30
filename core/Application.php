@@ -5,7 +5,7 @@ namespace Core;
 use Core\Config\ConfigFactory;
 use Core\Contracts\Factory;
 use Core\Database\Connection\ConnectionFactory;
-use Core\Http\Request;
+use Core\Http\Request\Request;
 use Core\Registry;
 use Core\Utility\Url;
 use Core\Validator\Validator;

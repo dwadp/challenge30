@@ -66,8 +66,19 @@ class Validator
         $handler = 'validate' . $this->getLabel($ruleKey);
 
         if (method_exists($this, $handler)) {
-            $this->$handler($ruleValue, $inputKey, $inputValue);
+            call_user_func_array([$this, $handler], [$ruleValue, $inputKey, $inputValue]);
         }
+    }
+
+    /**
+     * Generate a label
+     *
+     * @param   string $name
+     * @return  string
+     */
+    private function getLabel($name)
+    {
+        return ucwords($name);
     }
 
     /**
@@ -83,17 +94,6 @@ class Validator
             ($value === 0)) {
             $this->error->set($field, "{$this->getLabel($field)} is required");
         }
-    }
-
-    /**
-     * Generate a label
-     *
-     * @param   string $name
-     * @return  string
-     */
-    private function getLabel($name)
-    {
-        return ucwords($name);
     }
 
     /**

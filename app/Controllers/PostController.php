@@ -52,10 +52,10 @@ class PostController extends BaseController
      */
     public function store()
     {
-        $request = $this->request->all();
+        $request = request()->input->all();
 
         if (($this->validate($request)) &&
-            (!$this->request->empty())) {
+            (!request()->input->empty())) {
             Post::create($request);
 
             return $this->redirect('/');

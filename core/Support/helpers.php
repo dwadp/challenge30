@@ -74,3 +74,181 @@ if (!function_exists('now')) {
         return $now;
     }
 }
+
+if (!function_exists('e')) {
+    /**
+     * Escape all malicious html tags or script
+     *
+     * @param   string $value
+     * @return  string
+     */
+    function e($value) {
+        // List of html events attributes
+        // Reference: https://www.w3schools.com/tags/ref_eventattributes.asp
+        $windowEvents       = [
+            'onafterprint',
+            'onbeforeprint',
+            'onbeforeunload',
+            'onerror',
+            'onhashchange',
+            'onload',
+            'onmessage',
+            'onoffline',
+            'ononline',
+            'onpagehide',
+            'onpageshow',
+            'onpopstate',
+            'onresize',
+            'onstorage',
+            'onunload'
+        ];
+
+        $formEvents             = [
+            'onblur',
+            'onchange',
+            'oncontextmenu',
+            'onfocus',
+            'oninput',
+            'oninvalid',
+            'onreset',
+            'onsearch',
+            'onselect',
+            'onsubmit'
+        ];
+
+        $keyboardEvents         = [
+            'onkeydown',
+            'onkeypress',
+            'onkeyup'
+        ];
+
+        $mouseEvents            = [
+            'onclick',
+            'onmousedown',
+            'onmousemove',
+            'onmouseout',
+            'onmouseover',
+            'onmouseup',
+            'onwheel'
+        ];
+
+        $dragEvents             = [
+            'ondrag',
+            'ondragend',
+            'ondragenter',
+            'ondragleave',
+            'ondragover',
+            'ondragstart',
+            'ondrop',
+            'onscroll'
+        ];
+
+        $clipboardEvents        = [
+            'oncopy',
+            'oncut',
+            'onpaste'
+        ];
+
+        $mediaEvents            = [
+            'onabort',
+            'oncanplay',
+            'oncanplaythrough',
+            'oncuechange',
+            'ondurationchange',
+            'onemptied',
+            'onended',
+            'onerror',
+            'onloadeddata',
+            'onloadedmetadata',
+            'onloadstart',
+            'onpause',
+            'onplay',
+            'onplaying',
+            'onprogress',
+            'onratechange',
+            'onseeked',
+            'onseeking',
+            'onstalled',
+            'onsuspend',
+            'ontimeupdate',
+            'onvolumechange',
+            'onwaiting'
+        ];
+
+        $miscEvents             = [ 'ontoggle' ];
+
+        // List of html tags that are consider as dangerous
+        $tags                   = [
+            'script',
+            'style'
+        ];
+
+        $events = array_merge(
+            $windowEvents,
+            $formEvents,
+            $keyboardEvents,
+            $mouseEvents,
+            $dragEvents,
+            $clipboardEvents,
+            $mediaEvents,
+            $miscEvents
+        );
+
+        $sanitized = '';
+
+        // Remove all html DOM events
+        foreach ($events as $key => $event) {
+            $pattern    = '/(<[^>]+)*?' . $event . '=".*?"/im';
+            $sanitized  = preg_replace(
+                $pattern,
+                '$1',
+                ($key === 0) ? $value : $sanitized
+            );
+        }
+
+        // Find html embedded script and if it's not a valid url, then remove it
+        // Example: <a href="javascript:alert('Alert')">Link</a>
+        $embeddedScripts = [];
+
+        // Explicitly find for href="..." because a html tag might contain a style="..." attribute
+        // and we only interested in the 'href' attribute
+        preg_match(
+            '/(href)\=((?<=\=)|(?<=\>)).*:.*?((?=\>)|(?=\<))/im', 
+            $sanitized, 
+            $embeddedScripts
+        );
+        
+        foreach ($embeddedScripts as $script) {
+            $scriptValue = trim(str_replace('href=', '', $script), '"');
+
+            // If the value is empty or just 'href' then just skip the url validation
+            if ((!$scriptValue) ||
+                ($scriptValue === 'href')) {
+                continue;
+            }
+
+            // if it's not a valid url, then remove it entirely
+            if (!filter_var($scriptValue, FILTER_VALIDATE_URL)) {
+                $sanitized = preg_replace(
+                    '/(href)\=((?<=\=)|(?<=\>)).*:.*?((?=\>)|(?=\<))/im', 
+                    '$1', 
+                    $sanitized
+                );
+            }
+        }
+
+        // Replace the listed tags with more safe characters & symbols
+        foreach ($tags as $tag) {
+            $pattern = '/(<' . $tag . '.*?>([\s\S]*?)|<\/' . $tag . '>)/im';
+
+            // Any tags matched with the listed sanitized tags should be sanitized
+            // including a non valid html tag
+            if ((preg_match($pattern, $sanitized)) ||
+                (!preg_match("/<(\"[^\"]*\"|'[^']*'|[^'\">])*>/im", $sanitized))) {
+                return htmlspecialchars($sanitized, ENT_QUOTES);
+            }
+        }
+
+        return $sanitized;
+    }
+}

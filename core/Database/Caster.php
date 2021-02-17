@@ -107,10 +107,10 @@ class Caster
             return $value;
         }
 
-        $castHandler = 'castTo'.$this->makeCastHandlerName($cast);
+        $handler = 'castTo'.$this->makeCastHandlerName($cast);
 
-        if (method_exists($this, $castHandler)) {
-            return $this->$castHandler($value);
+        if (method_exists($this, $handler)) {
+            return call_user_func_array([$this, $handler], [$value]);
         }
     }
 
