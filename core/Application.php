@@ -7,6 +7,7 @@ use Core\Contracts\Factory;
 use Core\Database\Connection\ConnectionFactory;
 use Core\Http\Request\Request;
 use Core\Registry;
+use Core\Utility\Sanitization\Sanitization;
 use Core\Utility\Url;
 use Core\Validator\Validator;
 use Core\View\View;
@@ -39,7 +40,8 @@ class Application
         'connection'    => ConnectionFactory::class,
         'request'       => Request::class,
         'url'           => Url::class,
-        'view'          => View::class
+        'view'          => View::class,
+        'sanitization'  => Sanitization::class
     ];
 
     /**
