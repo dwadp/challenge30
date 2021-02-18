@@ -212,7 +212,7 @@ if (!function_exists('e')) {
         // Find html embedded script and if it's not a valid url, then remove it
         // Example: <a href="javascript:alert('Alert')">Link</a>
         $sanitized = preg_replace(
-            '/(href|src)\=.(?!https|http|mailto).*?:.*?((?=\>)|(?=\<)|(?<=\"))/im', 
+            '/(href|src|background|dynsrc|lowsrc)\=.(?!https|http|mailto).*?:.*?((?=\>)|(?=\<)|(?<=\"))/im', 
             '$1', 
             $sanitized
         );
