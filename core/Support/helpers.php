@@ -180,7 +180,10 @@ if (!function_exists('e')) {
         // List of html tags that are consider as dangerous
         $tags                   = [
             'script',
-            'style'
+            'style',
+            'object',
+            'embed',
+            'link'
         ];
 
         $events = array_merge(
@@ -208,34 +211,11 @@ if (!function_exists('e')) {
 
         // Find html embedded script and if it's not a valid url, then remove it
         // Example: <a href="javascript:alert('Alert')">Link</a>
-        $embeddedScripts = [];
-
-        // Explicitly find for href="..." because a html tag might contain a style="..." attribute
-        // and we only interested in the 'href' attribute
-        preg_match(
-            '/(href)\=((?<=\=)|(?<=\>)).*:.*?((?=\>)|(?=\<))/im', 
-            $sanitized, 
-            $embeddedScripts
+        $sanitized = preg_replace(
+            '/(href)\=.(?!https|http|mailto).*?:.*?((?=\>)|(?=\<)|(?<=\"))/im', 
+            '$1', 
+            $sanitized
         );
-        
-        foreach ($embeddedScripts as $script) {
-            $scriptValue = trim(str_replace('href=', '', $script), '"');
-
-            // If the value is empty or just 'href' then just skip the url validation
-            if ((!$scriptValue) ||
-                ($scriptValue === 'href')) {
-                continue;
-            }
-
-            // if it's not a valid url, then remove it entirely
-            if (!filter_var($scriptValue, FILTER_VALIDATE_URL)) {
-                $sanitized = preg_replace(
-                    '/(href)\=((?<=\=)|(?<=\>)).*:.*?((?=\>)|(?=\<))/im', 
-                    '$1', 
-                    $sanitized
-                );
-            }
-        }
 
         // Replace the listed tags with more safe characters & symbols
         foreach ($tags as $tag) {
